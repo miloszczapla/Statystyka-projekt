@@ -73,13 +73,19 @@ names(zarobki_kob_euro )[1] <- 'zakres_geograficzny'
 names(zarobki_mez_euro )[1] <- 'zakres_geograficzny'
 names(Parytety_sily_nabywczej )[1] <- 'zakres_geograficzny'
 names(bilans_zuzycia_wody )[1] <- 'zakres_geograficzny'
+names(przewidywana_dlugosc_zycia )[length(przewidywana_dlugosc_zycia)]<- 'przewidywana_dlugosc_zycia'
+names(edukajca_po_populacji )[length(edukajca_po_populacji)]<- 'edukajca'
+names(konsumpcja_owoce_warzywa )[length(konsumpcja_owoce_warzywa)]<- 'konsumpcja_owoce_warzywa'
+names(konsumpcja_owoce_warzywa )[5]<- 'geography'
+names(konsumpcja_owoce_warzywa )[6]<- 'date'
+
 
 #łączenie 1 ramki danych
 
 #redukcja precyzji do danych rocznych
+
+
 #Potrzebna lepsza nazwa!!!
-
-
 dt_1 <- merge(cena_gazu,cena_pradu,by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
 dt_1$okres_czasu <- str_remove(dt_1$okres_czasu,"-S[12]")
 dt_1 <- dt_1 %>%
@@ -96,5 +102,16 @@ merge(zarobki_mez_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) 
 merge(Parytety_sily_nabywczej, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
 merge(bilans_zuzycia_wody, by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
 
+#łączenie 2 ramki danych
+konsumpcja_owoce_warzywa<-konsumpcja_owoce_warzywa %>%
+  group_by(unit,n_portion,sex,age,country,time) %>%
+  summarise(konsumpcja_owoce_warzywa = mean(konsumpcja_owoce_warzywa, na.rm = FALSE))
+przewidywana_dlugosc_zycia[1,]
+edukajca_po_populacji[1,]
+konsumpcja_owoce_warzywa[1,]
+
+#Potrzebna lepsza nazwa!!!
+dt_2 <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
+  merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex'))
 
 
