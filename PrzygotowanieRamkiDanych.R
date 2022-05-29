@@ -4,6 +4,7 @@ library(countrycode)
 library(dplyr)
 library(ggplot2)
 
+#TODO: brakuje jeszcze kilku danych jak np cena jedzenia
 #kolumny: okresy czas
 cena_gazu <- read_excel('dane/cena_gazu.xlsx')
 cena_pradu <- read_excel('dane/cena_pradu.xlsx')
@@ -91,10 +92,7 @@ names(konsumpcja_owoce_warzywa )[6]<- 'date'
 
 #łączenie 1 ramki danych
 
-#redukcja precyzji do danych rocznych
-
-
-#Potrzebna lepsza nazwa!!!
+#TODO: Potrzebna lepsza nazwa!!!
 dt_1 <- merge(cena_gazu,cena_pradu,by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
 dt_1$okres_czasu <- str_remove(dt_1$okres_czasu,"-S[12]")
 dt_1 <- dt_1 %>%
@@ -109,47 +107,33 @@ dt_1 <- dt_1 %>%
   merge(zarobki_kob_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(zarobki_mez_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(Parytety_sily_nabywczej, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-  merge(bilans_zuzycia_wody, by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
+  merge(bilans_zuzycia_wody, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  na.omit()
 
 #łączenie 2 ramki danych
 konsumpcja_owoce_warzywa<-konsumpcja_owoce_warzywa %>%
   group_by(unit,n_portion,sex,age,country,time) %>%
   summarise(konsumpcja_owoce_warzywa = mean(konsumpcja_owoce_warzywa, na.rm = FALSE))
-przewidywana_dlugosc_zycia[1,]
-edukajca_po_populacji[1,]
-konsumpcja_owoce_warzywa[1,]
 
-#Potrzebna lepsza nazwa!!!
+#TODO: Potrzebna lepsza nazwa!!!
 dt_2 <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
-  merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex'))
+  merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex')) %>%
+  na.omit()
 
-sapply(dt_2,mode)
-
-dt_2_NA <- dt_2_NA %>%
+dt_2 <- dt_2 %>%
   group_by(geography,date,sex) %>%
   summarise(konsumpcja_owoce_warzywa = round(mean(konsumpcja_owoce_warzywa)),
   edukajca = round(mean(edukajca)),
   przewidywana_dlugosc_zycia = round(mean(przewidywana_dlugosc_zycia)))
-dt_2_NA <- dt_2_NA[-which(dt_2_NA$geography %in% c('EU27_2020','EU28')),] 
+dt_2 <- dt_2[-which(dt_2$geography %in% c('EU27_2020','EU28')),] 
 
-dt_2_NA$geography <-countrycode(dt_2_NA$geography,origin = 'eurostat',destination = 'country.name')
+dt_2$geography <-countrycode(dt_2$geography,origin = 'eurostat',destination = 'country.name')
 
-#Połączenie dt_1 i dt_2
+#####################################################
+#TODO: brakuje komentarz, ale to do omówienia z Kapłonem, hah
+#TODO: bardziej skomplokowane analizy, ale to te do omówienia z Kapłonem
 
-
-#sprawdzanie typu danych
-sapply(dt_1, mode)
-sapply(dt_2, mode)
-#wyklucza NA
-dt_1_NA <- na.omit(dt_1)
-dt_1_NA
-dt_2_NA <- na.omit(dt_2)
-dt_2_NA
-
-####################################################
-
-
-dt_1_zarobki <- dt_1_NA %>%
+dt_1_zarobki <- dt_1 %>%
   select(okres_czasu,zakres_geograficzny,średnie_roczne_zarobki_kobiet,średnie_roczne_zarobki_mężczyzn) %>%
   group_by(okres_czasu,zakres_geograficzny) %>%
   summarise(zarobki = round(średnie_roczne_zarobki_kobiet+średnie_roczne_zarobki_mężczyzn)/2,
@@ -163,7 +147,20 @@ wykres_zarobki <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y =
   + geom_line(size = 1)%>%
   + scale_y_continuous(breaks = seq(2000, 38000,2000))
 
- 
+wyykres_cena_gazu <- ggplot(dt_1, aes(x=okres_czasu,y = cena_gazu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line()
+wyykres_cena_pradu <- ggplot(dt_1, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line()
+
+dt_1$cena_wynajmu_za_miesiac
+
+
+wykres_podatki <- ggplot(dt_1, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line() %>%
+  + scale_y_continuous(breaks = seq(4, 36,2))
+
+wykres_cany_wynajmu <- ggplot(dt_1, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line()
 
 ### różnica pomiędzy zarobkami mężczyzn a kobiet
 
@@ -171,31 +168,11 @@ wykres_zarobki <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y =
 wyjres_rozn_kob_men <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y = roznica_zar_men_kob, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
   + geom_line()
 
-
-
-wyykres_cena_gazu <- ggplot(dt_1_NA, aes(x=okres_czasu,y = cena_gazu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line()
-wyykres_cena_pradu <- ggplot(dt_1_NA, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line()
-
-dt_1_NA$cena_wynajmu_za_miesiac
-
-
-wykres_podatki <- ggplot(dt_1_NA, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line() %>%
-  + scale_y_continuous(breaks = seq(4, 36,2))
-
-wykres_cany_wynajmu <- ggplot(dt_1_NA, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line()
-  #+ scale_y_continuous(breaks = seq(4, 36,2))
-
-
-
 ####################################################
 #wykres kraj/obszar a konsumpcja
-data_dt2 <- dt_2_NA$geography
+data_dt2 <- dt_2$geography
 #wiem ze z dupy ta czesc ale inaczej nie chcialo dzialac xd
-konsum <- summarise(dt_2_NA, konsumpcja = konsumpcja_owoce_warzywa)
+konsum <- summarise(dt_2, konsumpcja = konsumpcja_owoce_warzywa)
 df_wykres1 <- data.frame(data_dt2, konsum )
 df_wykres1
 test <- aggregate(konsumpcja ~ data_dt2, df_wykres1, mean)
@@ -203,9 +180,9 @@ wykres <- ggplot(test, aes(x = konsumpcja, y = data_dt2))
 wykres <- wykres + geom_point(size = 3)
 wykres + labs(x = "Konsumpcja", y = "Kraj lub obszar") 
 #wykres zarobki
-ZarobkiM <- dt_1_NA$średnie_roczne_zarobki_mężczyzn
-ZarobkiK <- dt_1_NA$średnie_roczne_zarobki_kobiet
-Kraj <- dt_1_NA$zakres_geograficzny
+ZarobkiM <- dt_1$średnie_roczne_zarobki_mężczyzn
+ZarobkiK <- dt_1$średnie_roczne_zarobki_kobiet
+Kraj <- dt_1$zakres_geograficzny
 df_wykres2 <- data.frame(ZarobkiK, zarobkiM, Kraj)
 df_wykres2
 SrZarobkiM <- aggregate(ZarobkiM ~ Kraj, df_wykres2, mean) 
