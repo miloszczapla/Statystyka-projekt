@@ -1,7 +1,8 @@
 library(tidyverse)
 library(readxl)
 library(countrycode)
-
+library(dplyr)
+library(ggplot2)
 
 #kolumny: okresy czas
 cena_gazu <- read_excel('dane/cena_gazu.xlsx')
@@ -37,6 +38,14 @@ cena_pradu_1 <- cena_pradu[-1,1]
 cena_pradu_2 <- sapply(cena_pradu[-1,-1],as.numeric)
 cena_pradu <- cbind(cena_pradu_1, cena_pradu_2)
 
+zarobki_kob_euro_1 <- zarobki_kob_euro[-1,1]
+zarobki_kob_euro_2 <- sapply(zarobki_kob_euro[-1,-1],as.numeric)
+zarobki_kob_euro <- cbind(zarobki_kob_euro_1, zarobki_kob_euro_2)
+
+zarobki_mez_euro_1 <- zarobki_mez_euro[-1,1]
+zarobki_mez_euro_2 <- sapply(zarobki_mez_euro[-1,-1],as.numeric)
+zarobki_mez_euro <- cbind(zarobki_mez_euro_1, zarobki_mez_euro_2)
+
 wynajem_1 <- wynajem[-1,1]
 wynajem_2 <- sapply(wynajem[-1,-1],as.numeric)
 wynajem <- cbind(wynajem_1, wynajem_2)
@@ -54,12 +63,12 @@ bilans_zuzycia_wody <- cbind(bilans_zuzycia_wody2_1, bilans_zuzycia_wody2_2)
 #prze organizowanie ramek danych
 cena_gazu <- pivot_longer(cena_gazu,cols = !TIME, names_to = "okres_czasu", values_to = "cena_gazu")
 cena_pradu <- pivot_longer(cena_pradu,cols = !TIME, names_to = "okres_czasu", values_to = "cena_pradu")
-wynajem <- pivot_longer(wynajem,cols = !"GEO/TIME", names_to = "okres_czasu", values_to = "cena_wynajmu_a_miesiac")
+wynajem <- pivot_longer(wynajem,cols = !"GEO/TIME", names_to = "okres_czasu", values_to = "cena_wynajmu_za_miesiac")
 wartosc_podatku <- pivot_longer(wartosc_podatku,cols = !TIME, names_to = "okres_czasu", values_to = "podatek_jako_%_dochodu")
 inflacja <- pivot_longer(inflacja,cols = !geo, names_to = "okres_czasu", values_to = "inflacja_rok_do_roku")
 zarobki_kob_euro <- pivot_longer(zarobki_kob_euro[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "średnie_roczne_zarobki_kobiet")
 zarobki_mez_euro <- pivot_longer(zarobki_mez_euro[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "średnie_roczne_zarobki_mężczyzn")
-Parytety_sily_nabywczej <- pivot_longer(Parytety_sily_nabywczej[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "średnie_roczne_zarobki_mężczyzn")
+Parytety_sily_nabywczej <- pivot_longer(Parytety_sily_nabywczej[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "parytety_sily_nabywczej")
 bilans_zuzycia_wody <- pivot_longer(bilans_zuzycia_wody,cols = !TIME, names_to = "okres_czasu", values_to = "żuzecie_wody_w_mil._m^3")
 
 
@@ -92,15 +101,15 @@ dt_1 <- dt_1 %>%
   group_by(okres_czasu,zakres_geograficzny) %>%
   summarise(cena_gazu = mean(cena_gazu, na.rm = FALSE),
             cena_pradu = mean(cena_pradu, na.rm = FALSE))
- 
+
 dt_1 <- dt_1 %>%
   merge(  wynajem, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-merge(wartosc_podatku, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-merge(inflacja, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-merge(zarobki_kob_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-merge(zarobki_mez_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-merge(Parytety_sily_nabywczej, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-merge(bilans_zuzycia_wody, by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
+  merge(wartosc_podatku, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  merge(inflacja, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  merge(zarobki_kob_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  merge(zarobki_mez_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  merge(Parytety_sily_nabywczej, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  merge(bilans_zuzycia_wody, by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
 
 #łączenie 2 ramki danych
 konsumpcja_owoce_warzywa<-konsumpcja_owoce_warzywa %>%
@@ -113,5 +122,90 @@ konsumpcja_owoce_warzywa[1,]
 #Potrzebna lepsza nazwa!!!
 dt_2 <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
   merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex'))
+dt_1
+dt_2
+#sprawdzanie typu danych
+sapply(dt_1, mode)
+sapply(dt_2, mode)
+#wyklucza NA
+dt_1_NA <- na.omit(dt_1)
+dt_1_NA
+dt_2_NA <- na.omit(dt_2)
+dt_2_NA
+
+####################################################
+
+
+dt_1_zarobki <- dt_1_NA %>%
+  select(okres_czasu,zakres_geograficzny,średnie_roczne_zarobki_kobiet,średnie_roczne_zarobki_mężczyzn) %>%
+  group_by(okres_czasu,zakres_geograficzny) %>%
+  summarise(zarobki = round(średnie_roczne_zarobki_kobiet+średnie_roczne_zarobki_mężczyzn)/2,
+            roznica_zar_men_kob = round((średnie_roczne_zarobki_mężczyzn-średnie_roczne_zarobki_kobiet)))
+
+dt_1_zarobki <- pivot_longer(dt_1_zarobki, cols = !c(okres_czasu,zakres_geograficzny,), names_to = 'plec', values_to = 'zarobki')
+dt_1_zarobki$plec[dt_1_zarobki$plec == 'średnie_roczne_zarobki_kobiet'] <- 'kobieta'
+dt_1_zarobki$plec[dt_1_zarobki$plec == 'średnie_roczne_zarobki_mężczyzn'] <- 'mężczyzna'
+
+wykres_zarobki <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y = zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  + geom_line(size = 1)%>%
+  + scale_y_continuous(breaks = seq(2000, 38000,2000))
+
+ 
+
+### różnica pomiędzy zarobkami mężczyzn a kobiet
+
+#nie wiem czy to jest warte dla 
+wyjres_rozn_kob_men <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y = roznica_zar_men_kob, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  + geom_line()
+
+
+
+wyykres_cena_gazu <- ggplot(dt_1_NA, aes(x=okres_czasu,y = cena_gazu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line()
+wyykres_cena_pradu <- ggplot(dt_1_NA, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line()
+
+dt_1_NA$cena_wynajmu_za_miesiac
+
+
+wykres_podatki <- ggplot(dt_1_NA, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line() %>%
+  + scale_y_continuous(breaks = seq(4, 36,2))
+
+wykres_cany_wynajmu <- ggplot(dt_1_NA, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+  +geom_line()
+  #+ scale_y_continuous(breaks = seq(4, 36,2))
+
+
+
+####################################################
+#wykres kraj/obszar a konsumpcja
+data_dt2 <- dt_2_NA$geography
+#wiem ze z dupy ta czesc ale inaczej nie chcialo dzialac xd
+konsum <- summarise(dt_2_NA, konsumpcja = konsumpcja_owoce_warzywa)
+df_wykres1 <- data.frame(data_dt2, konsum )
+df_wykres1
+test <- aggregate(konsumpcja ~ data_dt2, df_wykres1, mean)
+wykres <- ggplot(test, aes(x = konsumpcja, y = data_dt2))
+wykres <- wykres + geom_point(size = 3)
+wykres + labs(x = "Konsumpcja", y = "Kraj lub obszar") 
+#wykres zarobki
+ZarobkiM <- dt_1_NA$średnie_roczne_zarobki_mężczyzn
+ZarobkiK <- dt_1_NA$średnie_roczne_zarobki_kobiet
+Kraj <- dt_1_NA$zakres_geograficzny
+df_wykres2 <- data.frame(ZarobkiK, zarobkiM, Kraj)
+df_wykres2
+SrZarobkiM <- aggregate(ZarobkiM ~ Kraj, df_wykres2, mean) 
+SrZarobkiK <- aggregate(ZarobkiK ~ Kraj, df_wykres2, mean)
+SrZarobki <- cbind(SrZarobkiK, ZarM = SrZarobkiM$ZarobkiM)
+#K
+p6 <- ggplot(data = SrZarobki, mapping = aes(x = ZarobkiK, y = Kraj))
+p6 + geom_col()
+#M
+wykres2 <- ggplot() +
+  geom_col(data = SrZarobki, mapping = aes(x = ZarM, y =Kraj ), color = "white", fill = 'blue', position = "dodge")
+wykres2
+#Tu sie je polaczy gdzies
+#####################################################
 
 
