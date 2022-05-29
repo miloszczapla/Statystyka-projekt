@@ -122,8 +122,21 @@ konsumpcja_owoce_warzywa[1,]
 #Potrzebna lepsza nazwa!!!
 dt_2 <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
   merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex'))
-dt_1
-dt_2
+
+sapply(dt_2,mode)
+
+dt_2_NA <- dt_2_NA %>%
+  group_by(geography,date,sex) %>%
+  summarise(konsumpcja_owoce_warzywa = round(mean(konsumpcja_owoce_warzywa)),
+  edukajca = round(mean(edukajca)),
+  przewidywana_dlugosc_zycia = round(mean(przewidywana_dlugosc_zycia)))
+dt_2_NA <- dt_2_NA[-which(dt_2_NA$geography %in% c('EU27_2020','EU28')),] 
+
+dt_2_NA$geography <-countrycode(dt_2_NA$geography,origin = 'eurostat',destination = 'country.name')
+
+#Połączenie dt_1 i dt_2
+
+
 #sprawdzanie typu danych
 sapply(dt_1, mode)
 sapply(dt_2, mode)
