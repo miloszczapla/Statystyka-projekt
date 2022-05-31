@@ -160,6 +160,43 @@ wykres2 <- ggplot() +
   geom_col(data = SrZarobki, mapping = aes(x = ZarM, y =Kraj ), color = "white", fill = 'blue', position = "dodge")
 wykres2
 #Tu sie je polaczy gdzies
+#wykres3 - edukacja a kraj
+df3_NA <- na.omit(df_3)
+df3_NA
+panstwa2 <- dt_2$geography
+edukacja2 <- dt_2$edukajca
+df_3 <- data.frame(panstwa2, edukacja2)
+df_3
+srednia_edukacja <- group_by(df3_NA, panstwa2)
+srednia_edukacja <- summarise(srednia_edukacja,
+          srednia = mean(edukacja2))
+srednia_edukacja <- srednia_edukacja[-c(11, 12), ]
+srednia_edukacja
+wykres3 <- ggplot(srednia_edukacja, aes(x = panstwa2, y = srednia)) +
+  geom_col() +
+  labs(x = "Państwa", y = "Średnia wartość wykształcenia")
+wykres3
+#TRZEBA OGARNĄĆ JEDNOSTKE TEGO
+#wykres4 - inflacja
+
+Kraj <- dt_1$zakres_geograficzny
+Inflacja <- dt_1$inflacja_rok_do_roku
+Rok <- dt_1$okres_czasu
+df_4 <- data.frame(Kraj, Inflacja, Rok)  
+df_4
+df4_NA <- na.omit(df_4)
+df4_NA  
+Inflacja_w_panstwach <- group_by(df4_NA, Kraj)
+Inflacja_w_panstwach <- summarise(Inflacja_w_panstwach,
+                                  inflacja2 = mean(inflacja),
+                                  summarise(Rok)
+                                  )
+Inflacja_w_panstwach <- Inflacja_w_panstwach[-c(97:168),]
+Inflacja_w_panstwach
+  wykres4 <- ggplot(Inflacja_w_panstwach, aes(x = Rok, y = Inflacja, color = Kraj)) +
+ geom_point()
+wykres4
+#tu linia nie chce sie dodać, zobaczymy na labach
 #####################################################
 
 
