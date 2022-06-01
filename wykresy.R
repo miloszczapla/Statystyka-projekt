@@ -4,12 +4,11 @@ wykres_zarobki <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y =
   + geom_line(size = 1)%>%
   + scale_y_continuous(breaks = seq(2000, 38000,2000))
 
+#sprawdzić czy co względem polski? Jeśli małe wachania to uśrenienie? maksima minima?
 wyykres_cena_gazu <- ggplot(dt_1, aes(x=okres_czasu,y = cena_gazu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
   +geom_line()
 wyykres_cena_pradu <- ggplot(dt_1, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
   +geom_line()
-
-dt_1$cena_wynajmu_za_miesiac
 
 
 wykres_podatki <- ggplot(dt_1, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
@@ -22,7 +21,7 @@ wykres_cany_wynajmu <- ggplot(dt_1, aes(x=okres_czasu,y = cena_wynajmu_za_miesia
 ### różnica pomiędzy zarobkami mężczyzn a kobiet
 
 #nie wiem czy to jest warte dla 
-wyjres_rozn_kob_men <- ggplot(data = dt_1_zarobki, mapping = aes(x = okres_czasu, y = roznica_zar_men_kob, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+wyjres_rozn_kob_men <- ggplot(dt_1_zarobki, mapping = aes(x = okres_czasu, y = roznica_zar_men_kob, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
   + geom_line()
 
 ####################################################
@@ -52,6 +51,22 @@ p6 + geom_col()
 wykres2 <- ggplot() +
   geom_col(data = SrZarobki, mapping = aes(x = ZarM, y =Kraj ), color = "white", fill = 'blue', position = "dodge")
 wykres2
+
+
+#wykres4 - inflacja
+Kraj <- dt_1$zakres_geograficzny
+Inflacja <- dt_1$inflacja_rok_do_roku
+Rok <- dt_1$okres_czasu
+Inflacja_w_panstwach <- data.frame(Kraj, Inflacja, Rok) %>%
+  na.omit()
+wykres4 <- ggplot(Inflacja_w_panstwach, aes(x = Rok, y = Inflacja, color = Kraj, group= Kraj)) %>%
+   +geom_point() %>% 
+   +geom_point(data = Inflacja_w_panstwach[which.max(Inflacja_w_panstwach$Inflacja)],color ='RED') %>% 
+   +geom_point() %>% 
+  +geom_line()
+
+
+
 #Tu sie je polaczy gdzies
 #####################################################
 

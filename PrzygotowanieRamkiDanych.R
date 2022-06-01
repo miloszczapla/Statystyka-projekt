@@ -137,9 +137,8 @@ dt_1_zarobki <- dt_1 %>%
   select(okres_czasu,zakres_geograficzny,średnie_roczne_zarobki_kobiet,średnie_roczne_zarobki_mężczyzn) %>%
   group_by(okres_czasu,zakres_geograficzny) %>%
   summarise(zarobki = round(średnie_roczne_zarobki_kobiet+średnie_roczne_zarobki_mężczyzn)/2,
-            roznica_zar_men_kob = round((średnie_roczne_zarobki_mężczyzn-średnie_roczne_zarobki_kobiet)))
+roznica_zar_men_kob = round((średnie_roczne_zarobki_mężczyzn-średnie_roczne_zarobki_kobiet)))
 
 dt_1_zarobki <- pivot_longer(dt_1_zarobki, cols = !c(okres_czasu,zakres_geograficzny,), names_to = 'plec', values_to = 'zarobki')
 dt_1_zarobki$plec[dt_1_zarobki$plec == 'średnie_roczne_zarobki_kobiet'] <- 'kobieta'
 dt_1_zarobki$plec[dt_1_zarobki$plec == 'średnie_roczne_zarobki_mężczyzn'] <- 'mężczyzna'
-
