@@ -1,0 +1,99 @@
+---
+title: "Koszty życia w Unii Europejskiej"
+author: "Miłosz Czapla(266790), Piotr Pasterniak(266780)"
+date: "07.06.2022"
+output:
+    html_document: 
+      number_sections: yes
+      theme: united
+      toc: yes
+      toc_float: yes
+      dev: svg
+      highlight: haddock
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(echo = TRUE, 
+               cache = FALSE,
+               prompt = FALSE,
+               tidy = TRUE,
+               comment = NA,
+               message = FALSE,
+               warning = FALSE,
+               fig.width = 7.4,
+               fig.height = 4.7,
+               fig.align = "center")
+opts_knit$set(width = 75)
+```
+
+<style> 
+
+/* Jeśli znasz CSS,  to możesz wygląd dostosować do swoich preferencji */
+/* Możesz też usunąć tę część: style  */
+
+tr {font-family: 'Fira Mono'; font-size:90%}
+code, kbd,pre,samp {font-family: 'Fira Mono';
+                    background-color: rgba(237, 125, 49, 0.04)}
+body, h1, h2, h3, h4, h5 {font-family: 'Fira Sans'}
+
+</style>
+
+
+
+
+# Rozdział 1
+
+## Czego potrzebuję do oceny:
+
+- pliku .Rmd;
+- pliku .html;
+- innych plików, jeżeli są potrzebne, aby z .Rmd stworzyć .html - przykładem są zbiory danych; 
+- wszystko robimy w R,
+- termin: zgodnie z harmonogramem zajęć.
+
+
+
+## Wczytajmy potrzebne pakiety. Kody piszemy w tzw. wstawkach: 
+
+```{r}
+# Wczytuję grupę pakietów
+library(tidyverse)
+```
+
+
+## Czas na jakiś wykres.
+
+```{r}
+kable(mtcars[1:5, ]) # pokaż 5 wierszy ramki danych
+ggplot(mtcars, aes(x = mpg, y = qsec)) + theme_bw() +
+    geom_point(size = 4)
+```
+
+## Podrozdział
+
+TODO
+
+Kilka wyróżnień: _to pierwsze_, a to __drugie wyróżnienie__.
+
+### Może jakie wypunktowanie
+
+Lista 
+
+- pkt. 1
+- pkt. 2
+- pkt. 3
+
+A może taka?
+
+1. pkt. 1
+2. pkt. 2
+3. pkt. 3
+
+
+# Rozdział 2
+
+A może chcesz w opisie umieścić największą wartość z kolumny `hp`? Najwięcej, czyli `r max(mtcars$hp)` 
+koni mechanicznych ma samochów w wierszu nr `r which.max(mtcars$hp)`. 
+
+
