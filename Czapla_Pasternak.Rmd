@@ -39,11 +39,6 @@ body, h1, h2, h3, h4, h5 {font-family: 'Fira Sans'}
 
 </style>
 
-
-
-
-# Rozdział 1
-
 ## Czego potrzebuję do oceny:
 
 - pliku .Rmd;
@@ -53,12 +48,20 @@ body, h1, h2, h3, h4, h5 {font-family: 'Fira Sans'}
 - termin: zgodnie z harmonogramem zajęć.
 
 
+# Przygotowanie danych
 
-## Wczytajmy potrzebne pakiety. Kody piszemy w tzw. wstawkach: 
+## Wczytajmy potrzebne pakiety: 
 
 ```{r}
-# Wczytuję grupę pakietów
 library(tidyverse)
+```
+
+## Wczytajmy potrzebne ramki danych: 
+
+```{r}
+ramka_rok_do_roku_zmienne <- read_delim("parsed_dane/ramka_rok_do_roku_zmienne.csv")
+ramka_rok_do_roku_zarobki <- read_delim("parsed_dane/ramka_rok_do_roku_zarobki.csv")
+ramka_co_piec_lat <- read_delim("parsed_dane/ramka_co_piec_lat.csv")
 ```
 
 

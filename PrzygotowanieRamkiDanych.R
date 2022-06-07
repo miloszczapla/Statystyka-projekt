@@ -139,3 +139,9 @@ ramka_rok_do_roku_zarobki <- pivot_longer(ramka_rok_do_roku_zarobki, cols = !c(o
 ramka_rok_do_roku_zarobki$plec[ramka_rok_do_roku_zarobki$plec == 'średnie_roczne_zarobki_kobiet'] <- 'kobieta'
 ramka_rok_do_roku_zarobki$plec[ramka_rok_do_roku_zarobki$plec == 'średnie_roczne_zarobki_mężczyzn'] <- 'mężczyzna'
 
+#eksport ramkkek danych
+write_excel_csv2(ramka_rok_do_roku_zmienne, "parsed_dane/ramka_rok_do_roku_zmienne.csv")
+write_excel_csv2(ramka_rok_do_roku_zarobki, "parsed_dane/ramka_rok_do_roku_zarobki.csv")
+write_excel_csv2(ramka_co_piec_lat, "parsed_dane/ramka_co_piec_lat.csv")
+
+
