@@ -92,15 +92,14 @@ names(konsumpcja_owoce_warzywa )[6]<- 'date'
 
 #łączenie 1 ramki danych
 
-#TODO: Potrzebna lepsza nazwa!!!
-dt_1 <- merge(cena_gazu,cena_pradu,by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
-dt_1$okres_czasu <- str_remove(dt_1$okres_czasu,"-S[12]")
-dt_1 <- dt_1 %>%
+ramka_rok_do_roku_zmienne <- merge(cena_gazu,cena_pradu,by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
+ramka_rok_do_roku_zmienne$okres_czasu <- str_remove(ramka_rok_do_roku_zmienne$okres_czasu,"-S[12]")
+ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   group_by(okres_czasu,zakres_geograficzny) %>%
   summarise(cena_gazu = mean(cena_gazu, na.rm = FALSE),
             cena_pradu = mean(cena_pradu, na.rm = FALSE))
 
-dt_1 <- dt_1 %>%
+ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   merge(  wynajem, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(wartosc_podatku, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(inflacja, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
@@ -112,33 +111,31 @@ dt_1 <- dt_1 %>%
 
 #łączenie 2 ramki danych
 konsumpcja_owoce_warzywa<-konsumpcja_owoce_warzywa %>%
-  group_by(unit,n_portion,sex,age,country,time) %>%
+  group_by(unit,n_portion,sex,age,geography,date) %>%
   summarise(konsumpcja_owoce_warzywa = mean(konsumpcja_owoce_warzywa, na.rm = FALSE))
 
-#TODO: Potrzebna lepsza nazwa!!!
-dt_2 <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
+ramka_co_piec_lat <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
   merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex')) %>%
   na.omit()
 
-dt_2 <- dt_2 %>%
+ramka_co_piec_lat <- ramka_co_piec_lat %>%
   group_by(geography,date,sex) %>%
   summarise(konsumpcja_owoce_warzywa = round(mean(konsumpcja_owoce_warzywa)),
   edukajca = round(mean(edukajca)),
   przewidywana_dlugosc_zycia = round(mean(przewidywana_dlugosc_zycia)))
-dt_2 <- dt_2[-which(dt_2$geography %in% c('EU27_2020','EU28')),] 
+ramka_co_piec_lat <- ramka_co_piec_lat[-which(ramka_co_piec_lat$geography %in% c('EU27_2020','EU28')),] 
 
-dt_2$geography <-countrycode(dt_2$geography,origin = 'eurostat',destination = 'country.name')
+ramka_co_piec_lat$geography <-countrycode(ramka_co_piec_lat$geography,origin = 'eurostat',destination = 'country.name')
 
-#####################################################
-#TODO: brakuje komentarz, ale to do omówienia z Kapłonem, hah
 #TODO: bardziej skomplokowane analizy, ale to te do omówienia z Kapłonem
 
-dt_1_zarobki <- dt_1 %>%
+ramka_rok_do_roku_zarobki <- ramka_rok_do_roku_zmienne %>%
   select(okres_czasu,zakres_geograficzny,średnie_roczne_zarobki_kobiet,średnie_roczne_zarobki_mężczyzn) %>%
   group_by(okres_czasu,zakres_geograficzny) %>%
   summarise(zarobki = round(średnie_roczne_zarobki_kobiet+średnie_roczne_zarobki_mężczyzn)/2,
 roznica_zar_men_kob = round((średnie_roczne_zarobki_mężczyzn-średnie_roczne_zarobki_kobiet)))
 
-dt_1_zarobki <- pivot_longer(dt_1_zarobki, cols = !c(okres_czasu,zakres_geograficzny,), names_to = 'plec', values_to = 'zarobki')
-dt_1_zarobki$plec[dt_1_zarobki$plec == 'średnie_roczne_zarobki_kobiet'] <- 'kobieta'
-dt_1_zarobki$plec[dt_1_zarobki$plec == 'średnie_roczne_zarobki_mężczyzn'] <- 'mężczyzna'
+ramka_rok_do_roku_zarobki <- pivot_longer(ramka_rok_do_roku_zarobki, cols = !c(okres_czasu,zakres_geograficzny,), names_to = 'plec', values_to = 'zarobki')
+ramka_rok_do_roku_zarobki$plec[ramka_rok_do_roku_zarobki$plec == 'średnie_roczne_zarobki_kobiet'] <- 'kobieta'
+ramka_rok_do_roku_zarobki$plec[ramka_rok_do_roku_zarobki$plec == 'średnie_roczne_zarobki_mężczyzn'] <- 'mężczyzna'
+
