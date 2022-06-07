@@ -8,7 +8,7 @@ library(ggplot2)
 #kolumny: okresy czas
 cena_gazu <- read_excel('dane/cena_gazu.xlsx')
 cena_pradu <- read_excel('dane/cena_pradu.xlsx')
-wynajem <- read_excel('dane/wynajem.xlsx')
+zmiana_cen_domow <- read_excel('dane/zmiana_cen_domow.xlsx')
 wartosc_podatku <- read_excel('dane/wartosc_podatku.xlsx')
 inflacja <- read_csv('dane/inflacja.csv')
 zarobki_kob_euro <- read_excel('dane/zarobki_kob_euro.xlsx')

@@ -48,12 +48,14 @@ body, h1, h2, h3, h4, h5 {font-family: 'Fira Sans'}
 - termin: zgodnie z harmonogramem zajęć.
 
 
-# Przygotowanie danych
+# Przygotowanie danych, narzędzi, wgranie bibliotek
 
 ## Wczytajmy potrzebne pakiety: 
 
 ```{r}
 library(tidyverse)
+library(gghighlight)
+library(ggplot2)
 ```
 
 ## Wczytajmy potrzebne ramki danych: 
@@ -64,14 +66,66 @@ ramka_rok_do_roku_zarobki <- read_delim("parsed_dane/ramka_rok_do_roku_zarobki.c
 ramka_co_piec_lat <- read_delim("parsed_dane/ramka_co_piec_lat.csv")
 ```
 
-
-## Czas na jakiś wykres.
+## stworzenie funckcji wybierającej kraje z najbardziej skrajnymi wartościami i subiektywny wybór krajów
 
 ```{r}
-kable(mtcars[1:5, ]) # pokaż 5 wierszy ramki danych
-ggplot(mtcars, aes(x = mpg, y = qsec)) + theme_bw() +
-    geom_point(size = 4)
+  getKrajeDoPorownaniaPolski <- function(ramka, kolumna_poruwnawcza) {
+    unique(c(ramka$zakres_geograficzny[c(which(kolumna_poruwnawcza == max(kolumna_poruwnawcza) | kolumna_poruwnawcza == min(kolumna_poruwnawcza)))],'Poland','Hungary','Czechia','Romania','Turkey','Spain' ))
+  }
 ```
+
+# Wykresy cen na podstawei danych rok do roku
+
+## dane na których pracujemy
+
+``` {r}
+kable(ramka_rok_do_roku_zmienne[1:5,]) # pokaż 5 wierszy ramki danych
+```
+
+## cena gazu
+
+```{r}
+ ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu,group = zakres_geograficzny,color = zakres_geograficzny)) +
+  geom_line() +
+  gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu)) +
+  labs(y = 'Cena gazu [EUR/KWh]')
+```
+
+Z wykresu możemy zauważyć, że cena gazu w Europie, mogą się mocno różnić. Mówimy tutaj nawet o 5-krotnej różnicy. W większości krajów widzimy tendencję zniżkową. Polska na ten moment plasuje się w tańszej części przedziału cenowego. Najtaniej pod względem ceny gazu plasuje się Rumunia, Węgry i Turcja. Najdrożej jest natomiast w Hiszpanii.
+
+## cena prądu
+
+```{r}
+ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) +
+geom_line() +
+gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_pradu))  +
+labs(y = 'Cena prądu [EUR/KWh]')
+```
+
+Ogólnie ceny prądu nie wykazują jakiegoś wspólnego, wyraźnego trendu jak to miało miejsce przy cenie gazu ziemnego. Za pozytywne możemy uznać znacznie taniejącą energię elektryczną w Polsce. Jest nam bardzo blisko do najtańszej Turcji. Hiszpania należy do najdroższych krajów.
+
+ 
+## Opodatkowanie pencji 
+
+```{r}
+ ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) +
+  geom_line() +
+  scale_y_continuous(breaks = seq(4, 36,2)) + 
+gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`)) +
+  labs(y = 'opodatkowanie pensji [% pensji]')
+```
+
+Pensje w krajach się różnią, ale oprócz tego kraje różnią się opodatkowaniem tych pensji. Hiszpania bardzo __nisko__ opodatkowuje pensje. Polska, Turcja i Czechy należą do grupy średnio opodatkowujących pensję krajów. Węgry i od niedawna także Rumunia bardzo wysoko opodatkowują pensję.
+
+## Zmiany cen mieszkań
+
+```{r}
+ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) +
+geom_line() + 
+  gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_wynajmu_za_miesiac)) +
+  labs(y = 'cena zakupu powierzchni mieszkaniowej [2015 rok = 100]')
+```
+
 
 ## Podrozdział
 

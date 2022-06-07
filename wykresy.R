@@ -2,7 +2,7 @@
   
   library(gghighlight)  
   getKrajeDoPorownaniaPolski <- function(ramka, kolumna_poruwnawcza) {
-    unique(c(ramka$zakres_geograficzny[c(which(kolumna_poruwnawcza == max(kolumna_poruwnawcza) | kolumna_poruwnawcza == min(kolumna_poruwnawcza)))],'Poland','Hungary','Czechia','Germany','Romania' ))
+    unique(c(ramka$zakres_geograficzny[c(which(kolumna_poruwnawcza == max(kolumna_poruwnawcza) | kolumna_poruwnawcza == min(kolumna_poruwnawcza)))],'Poland','Hungary','Czechia','Germany','Romania','ą' ))
   }
   
 wykres_zarobki <- ggplot(data = ramka_rok_do_roku_zarobki, mapping = aes(x = okres_czasu, y = zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
@@ -10,19 +10,21 @@ wykres_zarobki <- ggplot(data = ramka_rok_do_roku_zarobki, mapping = aes(x = okr
   + scale_y_continuous(breaks = seq(2000, 38000,2000)) + gghighligh()
 #sprawdzić czy co względem polski? Jeśli małe wachania to uśrenienie? maksima minima?
 
-wyykres_cena_gazu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu,group = zakres_geograficzny,color = zakres_geograficzny)) +
-  geom_line() +
-  gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu))
+# wyykres_cena_gazu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu,group = zakres_geograficzny,color = zakres_geograficzny)) +
+#   geom_line() +
+#   scale_y_continuous(breaks = seq(0.01, 0.08,0.005)) +
+#   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu))
 
-wyykres_cena_pradu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line()
+# wyykres_cena_pradu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) +
+# geom_line() +
+# gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu))
 
-wykres_podatki <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line() %>%
-  + scale_y_continuous(breaks = seq(4, 36,2))
-
-wykres_cany_wynajmu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line()
+# wykres_podatki <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+#   +geom_line() %>%
+#   + scale_y_continuous(breaks = seq(4, 36,2)) + 
+  
+# wykres_cany_wynajmu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
+#   +geom_line()
 
 ### różnica pomiędzy zarobkami mężczyzn a kobiet
 #nie wiem czy to jest warte dla 
