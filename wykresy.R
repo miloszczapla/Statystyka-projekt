@@ -6,7 +6,7 @@
   }
   
 wykres_zarobki <- ggplot(data = ramka_rok_do_roku_zarobki, mapping = aes(x = okres_czasu, y = zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  + geom_line(size = 1)%>%
+  + geom_line(size = 1) %>%
   + scale_y_continuous(breaks = seq(2000, 38000,2000)) + gghighligh()
 #sprawdzić czy co względem polski? Jeśli małe wachania to uśrenienie? maksima minima?
 

@@ -53,7 +53,6 @@ library(ggplot2)
 
 ```{r}
 ramka_rok_do_roku_zmienne <- read_delim("parsed_dane/ramka_rok_do_roku_zmienne.csv")
-ramka_rok_do_roku_zarobki <- read_delim("parsed_dane/ramka_rok_do_roku_zarobki.csv")
 ramka_co_piec_lat <- read_delim("parsed_dane/ramka_co_piec_lat.csv")
 
 #naprawa źle pobranhych danych typu double
@@ -98,7 +97,7 @@ gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorowna
 labs(x = 'rok',y = 'Cena prądu [EUR/KWh]')
 ```
 
-Ogólnie ceny prądu nie wykazują jakiegoś wspólnego, wyraźnego trendu jak to miało miejsce przy cenie gazu ziemnego. Za pozytywne możemy uznać znacznie taniejącą energię elektryczną w Polsce. Jest nam bardzo blisko do najtańszej Turcji. Hiszpania należy do najdroższych krajów.
+Ogólnie ceny prądu nie wykazują jakiegoś wspólnego, wyraźnego trendu jak to miało miejsce przy cenie gazu ziemnego. Za pozytywne możemy uznać znacznie taniejącą energię elektryczną w Polsce. Jest nam bardzo blisko do najtańszej Turcji. Hiszpania należy do najdroższych pod tym względem krajów.
 
  
 ## Zmiany cen nieruchomości
@@ -136,7 +135,7 @@ gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorowna
   labs(x = 'rok',y = 'opodatkowanie pensji [% pensji]')
 ```
 
-Pensje w krajach się różnią, ale oprócz tego kraje różnią się opodatkowaniem tych pensji. Hiszpania i Estonii bardzo __nisko__ opodatkowuje pensje. Polska, Turcja i Czechy należą do grupy średnio opodatkowujących pensję krajów. Węgry i od niedawna także Rumunia bardzo wysoko opodatkowują pensję.
+Pensje w krajach się różnią, ale oprócz tego kraje różnią się opodatkowaniem tych pensji. W HiszpaniI i Estonii bardzo __nisko__ opodatkowuje pensje. Polska, Turcja i Czechy należą do grupy średnio opodatkowujących pensję krajów. Węgry i od niedawna także Rumunia bardzo wysoko opodatkowują pensję.
 
 ## średnie zarobki
 
@@ -162,7 +161,8 @@ gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorowna
   labs(x = 'rok',y = 'średnie roczne zarobki pomniejszone o podatek[EUR]')
 ```
 
-Jak widzimy mimo różnych stawek podatkowych nie wpłynęło to zbytnio na kraje, które nas interesują. Najlepiej zarabia się w Luksemburgu, najgorzej w Rumuni i Turcji, Polska plasuje się niewiele wyżej. Można powiedzieć, że Europa dzieli się w większości na kraje, w których zarabia się rocznie do 10000 Euro rocznie i to tych gdzie te zarobki są średnio zbliżone do 15-18 tysięcy za rok wykonywania pracy.
+Jak widzimy mimo różnych stawek podatkowych nie wpłynęło to zbytnio na kraje, które nas interesują. Najlepiej zarabia się w Luksemburgu, najgorzej w Rumunii i Turcji, Polska plasuje się niewiele wyżej. Można powiedzieć, że Europa dzieli się w większości na kraje, w których zarabia się rocznie do 10000 Euro rocznie i to tych gdzie te zarobki są średnio zbliżone do 15-18 tysięcy za rok wykonywania pracy.
+
 
 
 ## Podrozdział

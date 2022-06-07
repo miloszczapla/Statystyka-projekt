@@ -99,7 +99,7 @@ names(konsumpcja_owoce_warzywa )[5]<- 'geography'
 names(konsumpcja_owoce_warzywa )[6]<- 'date'
 
 
-#łączenie 1 ramki danych
+#łączenie pierwszej ramki danych
 
 ramka_rok_do_roku_zmienne <- merge(cena_gazu,cena_pradu,by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
 ramka_rok_do_roku_zmienne$okres_czasu <- str_remove(ramka_rok_do_roku_zmienne$okres_czasu,"-S[12]")
@@ -121,10 +121,7 @@ ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
 na.omit()
 
 
-
-
-
-#łączenie 2 ramki danych
+#łączenie drugiej ramki danych
 konsumpcja_owoce_warzywa<-konsumpcja_owoce_warzywa %>%
   group_by(unit,n_portion,sex,age,geography,date) %>%
   summarise(konsumpcja_owoce_warzywa = mean(konsumpcja_owoce_warzywa, na.rm = FALSE))
@@ -142,21 +139,8 @@ ramka_co_piec_lat <- ramka_co_piec_lat[-which(ramka_co_piec_lat$geography %in% c
 
 ramka_co_piec_lat$geography <-countrycode(ramka_co_piec_lat$geography,origin = 'eurostat',destination = 'country.name')
 
-#TODO: bardziej skomplokowane analizy, ale to te do omówienia z Kapłonem
-
-ramka_rok_do_roku_zarobki <- ramka_rok_do_roku_zmienne %>%
-  select(okres_czasu,zakres_geograficzny,średnie_roczne_zarobki_kobiet,średnie_roczne_zarobki_mężczyzn) %>%
-  group_by(okres_czasu,zakres_geograficzny) %>%
-  summarise(zarobki = round(średnie_roczne_zarobki_kobiet+średnie_roczne_zarobki_mężczyzn)/2,
-roznica_zar_men_kob = round((średnie_roczne_zarobki_mężczyzn-średnie_roczne_zarobki_kobiet)))
-
-ramka_rok_do_roku_zarobki <- pivot_longer(ramka_rok_do_roku_zarobki, cols = !c(okres_czasu,zakres_geograficzny,), names_to = 'plec', values_to = 'zarobki')
-ramka_rok_do_roku_zarobki$plec[ramka_rok_do_roku_zarobki$plec == 'średnie_roczne_zarobki_kobiet'] <- 'kobieta'
-ramka_rok_do_roku_zarobki$plec[ramka_rok_do_roku_zarobki$plec == 'średnie_roczne_zarobki_mężczyzn'] <- 'mężczyzna'
-
 #eksport ramkkek danych
 write_excel_csv2(ramka_rok_do_roku_zmienne, "parsed_dane/ramka_rok_do_roku_zmienne.csv")
-write_excel_csv2(ramka_rok_do_roku_zarobki, "parsed_dane/ramka_rok_do_roku_zarobki.csv")
 write_excel_csv2(ramka_co_piec_lat, "parsed_dane/ramka_co_piec_lat.csv")
 
 
