@@ -53,7 +53,6 @@ library(ggplot2)
 
 ```{r}
 ramka_rok_do_roku_zmienne <- read_delim("parsed_dane/ramka_rok_do_roku_zmienne.csv")
-ramka_co_piec_lat <- read_delim("parsed_dane/ramka_co_piec_lat.csv")
 
 #naprawa źle pobranhych danych typu double
 ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`  <- ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`   /100

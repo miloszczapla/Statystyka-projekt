@@ -14,13 +14,6 @@ inflacja <- read_csv('dane/inflacja.csv')
 zarobki_kob_euro <- read_excel('dane/zarobki_kob_euro.xlsx')
 zarobki_mez_euro <- read_excel('dane/zarobki_mez_euro.xlsx')
 parytety_sily_nabywczej <- read_excel('dane/parytety_sily_nabywczej.xlsx')
-
-
-#kolumny: płeć, kraj, okres czasu, wartość
-konsumpcja_owoce_warzywa <- read_csv('dane/konsumpcja_owoce_warzywa.csv')
-przewidywana_dlugosc_zycia <- read_csv('dane/przewidywana_dlugosc_zycia.csv')
-edukajca_po_populacji <- read_csv('dane/edukajca_po_populacji.csv')
-
 ceny_mil_euro <- read_excel('dane/ceny_mil_euro.xlsx')
 populacja_w_europie <- read_excel('dane/populacja_w_europie.xlsx')
 
@@ -89,17 +82,30 @@ names(parytety_sily_nabywczej )[1] <- 'zakres_geograficzny'
 names(ceny_nowych_mieszkan )[1] <- 'zakres_geograficzny'
 names(ceny_uzywanych_mieszkan )[1] <- 'zakres_geograficzny'
 names(populacja_w_europie )[1] <- 'zakres_geograficzny'
-names(przewidywana_dlugosc_zycia )[length(przewidywana_dlugosc_zycia)]<- 'przewidywana_dlugosc_zycia'
-names(edukajca_po_populacji )[length(edukajca_po_populacji)]<- 'edukajca'
-names(konsumpcja_owoce_warzywa )[length(konsumpcja_owoce_warzywa)]<- 'konsumpcja_owoce_warzywa'
-names(konsumpcja_owoce_warzywa )[5]<- 'geography'
-names(konsumpcja_owoce_warzywa )[6]<- 'date'
+
+
+
+
+
 
 #usuwanie zbędnych krajów, rejonów
 
 ceny_mil_euro <- ceny_mil_euro[-which(ceny_mil_euro$zakres_geograficzny %in% c('European Union - 28 countries (2013-2020)','European Union - 15 countries (1995-2004)','Euro area (EA11-1999, EA12-2001, EA13-2007, EA15-2008, EA16-2009, EA17-2011, EA18-2014, EA19-2015)','Euro area - 19 countries  (from 2015)','Euro area - 19 countries  (from 2015)','Euro area - 19 countries  (from 2015)')),] 
 populacja_w_europie <- populacja_w_europie[-which(populacja_w_europie$zakres_geograficzny %in% c('European Union - 27 countries (from 2020)','European Union - 28 countries (2013-2020)','Euro area - 19 countries  (from 2015)','Euro area - 18 countries (2014)','Germany (until 1990 former territory of the FRG)')),] 
 #łączenie pierwszej ramki danych
+
+
+ceny_mil_euro <- ceny_mil_euro %>%
+  merge(populacja_w_europie, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
+  filter_all(all_vars(. != ':')) %>%
+  na.omit()
+
+
+for ( naglowek in names(ceny_mil_euro)[-c(1,2)]) {
+  ceny_mil_euro[,naglowek] <- as.numeric(ceny_mil_euro[,naglowek]) / (ceny_mil_euro$populacja_w_europie /1000000) #ponieważ wartości są w milionach EURO to dzielimy przez 1000000
+}
+  
+
 ramka_rok_do_roku_zmienne <- merge(cena_gazu,cena_pradu,by = c('zakres_geograficzny','okres_czasu'), all= TRUE)
 ramka_rok_do_roku_zmienne$okres_czasu <- str_remove(ramka_rok_do_roku_zmienne$okres_czasu,"-S[12]")
 ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
@@ -107,9 +113,7 @@ ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   summarise(cena_gazu = mean(cena_gazu, na.rm = FALSE),
             cena_pradu = mean(cena_pradu, na.rm = FALSE))
 
-for (col in ceny_mil_euro) {
-  print(col)
-}
+
 
 ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   merge(wartosc_podatku, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
@@ -124,29 +128,10 @@ ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   mutate(sr_zarobki = round(średnie_roczne_zarobki_kobiet+średnie_roczne_zarobki_mężczyzn)/2) %>%
   na.omit()
 
-ramka_rok_do_roku_zmienne <-  
 
 
-#łączenie drugiej ramki danych
-konsumpcja_owoce_warzywa<-konsumpcja_owoce_warzywa %>%
-  group_by(unit,n_portion,sex,age,geography,date) %>%
-  summarise(konsumpcja_owoce_warzywa = mean(konsumpcja_owoce_warzywa, na.rm = FALSE))
 
-ramka_co_piec_lat <- merge(konsumpcja_owoce_warzywa[,-which(names(konsumpcja_owoce_warzywa) %in% c("unit","n_portion",'age'))],edukajca_po_populacji[,-which(names(edukajca_po_populacji) %in% c("unit","isced11",'age'))],by = c('geography','date','sex')) %>%
-  merge(przewidywana_dlugosc_zycia[,-which(names(przewidywana_dlugosc_zycia) %in% c("unit","statinfo"))], by = c('geography','date','sex')) %>%
-  na.omit()
-
-ramka_co_piec_lat <- ramka_co_piec_lat %>%
-  group_by(geography,date,sex) %>%
-  summarise(konsumpcja_owoce_warzywa = round(mean(konsumpcja_owoce_warzywa)),
-  edukajca = round(mean(edukajca)),
-  przewidywana_dlugosc_zycia = round(mean(przewidywana_dlugosc_zycia)))
-ramka_co_piec_lat <- ramka_co_piec_lat[-which(ramka_co_piec_lat$geography %in% c('EU27_2020','EU28')),] 
-
-ramka_co_piec_lat$geography <-countrycode(ramka_co_piec_lat$geography,origin = 'eurostat',destination = 'country.name')
-
-#eksport ramkkek danych
 write_excel_csv2(ramka_rok_do_roku_zmienne, "parsed_dane/ramka_rok_do_roku_zmienne.csv")
-write_excel_csv2(ramka_co_piec_lat, "parsed_dane/ramka_co_piec_lat.csv")
+
 
 
