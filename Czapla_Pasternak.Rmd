@@ -146,6 +146,15 @@ gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorowna
   labs(x = 'rok',y = 'średnie roczne zarobki[EUR]')
 ```
 
+```{r}
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = sr_zarobki, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średnie roczne zarobki [EUR]')
+```
+
+Z wuykresu wynika że większość krajów ma bardzo stabilne zarobki na przestrzeni lat. Estonia, Luxrnburg i Holandia tylko mają większe odchylenia od mediany. 
+
 ## średnie zarobki pomniejszone o podatek
 
 
@@ -163,7 +172,14 @@ gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorowna
 
 Jak widzimy mimo różnych stawek podatkowych nie wpłynęło to zbytnio na kraje, które nas interesują. Najlepiej zarabia się w Luksemburgu, najgorzej w Rumunii i Turcji, Polska plasuje się niewiele wyżej. Można powiedzieć, że Europa dzieli się w większości na kraje, w których zarabia się rocznie do 10000 Euro rocznie i to tych gdzie te zarobki są średnio zbliżone do 15-18 tysięcy za rok wykonywania pracy.
 
+## bezrobocie
 
+```{r}
+ ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = bezrobocie, color=zakres_geograficzny, group = zakres_geograficzny)) +
+  geom_line() +
+gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$bezrobocie)) +
+  labs(x = 'rok',y = 'średnie roczne zarobki[EUR]')
+```
 
 ## Podrozdział
 

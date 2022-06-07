@@ -6,7 +6,7 @@
   }
   
 wykres_zarobki <- ggplot(data = ramka_rok_do_roku_zarobki, mapping = aes(x = okres_czasu, y = zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  + geom_line(size = 1) %>%
+  + geom_line(size = 1)%>%
   + scale_y_continuous(breaks = seq(2000, 38000,2000)) + gghighligh()
 #sprawdzić czy co względem polski? Jeśli małe wachania to uśrenienie? maksima minima?
 
@@ -25,6 +25,18 @@ wykres_zarobki <- ggplot(data = ramka_rok_do_roku_zarobki, mapping = aes(x = okr
   
 # wykres_cany_wynajmu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_wynajmu_za_miesiac, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
 #   +geom_line()
+
+ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
+  mutate(sr_zarobki_bez_podatku= sr_zarobki-(sr_zarobki*`podatek_jako_%_dochodu`/100))
+
+# sam wykres
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = sr_zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(2) +
+  gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$sr_zarobki_bez_podatku)) +
+  labs(x = 'rok',y = 'średnie roczne zarobki pomniejszone o podatek[EUR]')
+
+ggplot(ramka_rok_do_roku_zmienne, )
 
 ### różnica pomiędzy zarobkami mężczyzn a kobiet
 #nie wiem czy to jest warte dla 
@@ -158,6 +170,7 @@ PolskaTlo5 <- filter(ramka_rok_do_roku_zmienne, zakres_geograficzny == "Poland")
   rbind(Estonia)%>%
   rbind(Rumunia2)%>%
   rbind(Czechy3)
+
 
 
 PolskaTloPodatki <- ggplot(PolskaTlo5, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
