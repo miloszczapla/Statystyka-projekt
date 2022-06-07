@@ -1,11 +1,18 @@
   source("PrzygotowanieRamkiDanych.R", encoding = "UTF-8")
+  
+  library(gghighlight)  
+  getKrajeDoPorownaniaPolski <- function(ramka, kolumna_poruwnawcza) {
+    unique(c(ramka$zakres_geograficzny[c(which(kolumna_poruwnawcza == max(kolumna_poruwnawcza) | kolumna_poruwnawcza == min(kolumna_poruwnawcza)))],'Poland','Hungary','Czechia','Germany','Romania' ))
+  }
+  
 wykres_zarobki <- ggplot(data = ramka_rok_do_roku_zarobki, mapping = aes(x = okres_czasu, y = zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
   + geom_line(size = 1)%>%
-  + scale_y_continuous(breaks = seq(2000, 38000,2000))
+  + scale_y_continuous(breaks = seq(2000, 38000,2000)) + gghighligh()
 #sprawdzić czy co względem polski? Jeśli małe wachania to uśrenienie? maksima minima?
 
-wyykres_cena_gazu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
-  +geom_line()
+wyykres_cena_gazu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu,group = zakres_geograficzny,color = zakres_geograficzny)) +
+  geom_line() +
+  gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu))
 
 wyykres_cena_pradu <- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) %>%
   +geom_line()
@@ -93,10 +100,10 @@ PolskaTlo1 <- filter(Inflacja_w_panstwach, Kraj == "Poland") %>%
   rbind(Turcja)%>%
   rbind(Chorwacja)%>%
   rbind(Czechy)
-PolskaTloInflacja <- ggplot(PolskaTlo1, aes(x = Rok, y = Inflacja, color = Kraj, group= Kraj)) %>%
-  +geom_point() %>% 
-  +geom_line() %>%
-  +labs(x = "Lata", y = "Inflacja (%)")
+PolskaTloInflacja <- ggplot(PolskaTlo1, aes(x = Rok, y = Inflacja, color = Kraj, group= Kraj))%>%
++ geom_point() %>% 
+  + geom_line() %>%
+  + labs(x = "Lata", y = "Inflacja (%)")
 
 ###############################################################################################
 #Tu sie je polaczy gdzies
