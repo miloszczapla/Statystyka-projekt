@@ -132,7 +132,7 @@ Na rynku nieruchomości widzimy silny trend wzrostowy, na rynku wtórnym widać 
 ## koszty według roku w postaci tabelki
 ```{r}
 as.data.frame(ceny_mil_euro) %>%  arrange(okres_czasu)
-kable(ceny_mil_euro[, -c(3, length(ceny_mil_euro))])
+kable(ceny_mil_euro[10, -c(3, length(ceny_mil_euro))]) #tylko pierwszych 10 rekordów
 
 ```
 
@@ -177,6 +177,9 @@ ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = `Food and non-al
     ggtitle("jedzenie i napoje bez-alkoholowe")
 
 ```
+
+Uzyskane wyniki świadczą o dużych różnicach w wydatkach ludzi z różnych krajów, mimo że mieszkańcy Luksemburgu zawsze wydaje najwięcej w porównaniu do innych, to ludzie z reszty krajów zależnie od wybranej grupy wydatków zmieniała swoje preferencje wydawania pieniędzy.
+
 # Zarobki, ich opodatkowanie
 
 ## Opodatkowanie zarobków 
