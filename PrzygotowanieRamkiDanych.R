@@ -102,7 +102,7 @@ ceny_mil_euro <- ceny_mil_euro %>%
 
 
 for ( naglowek in names(ceny_mil_euro)[-c(1,2)]) {
-  ceny_mil_euro[,naglowek] <- as.numeric(ceny_mil_euro[,naglowek]) / (ceny_mil_euro$populacja_w_europie /1000000) #ponieważ wartości są w milionach EURO to dzielimy przez 1000000
+  ceny_mil_euro[,naglowek] <- round(as.numeric(ceny_mil_euro[,naglowek]) / (ceny_mil_euro$populacja_w_europie /1000000)) #ponieważ wartości są w milionach EURO to dzielimy przez 1000000
 }
   
 
@@ -111,7 +111,7 @@ ramka_rok_do_roku_zmienne$okres_czasu <- str_remove(ramka_rok_do_roku_zmienne$ok
 ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   group_by(okres_czasu,zakres_geograficzny) %>%
   summarise(cena_gazu = mean(cena_gazu, na.rm = FALSE),
-            cena_pradu = mean(cena_pradu, na.rm = FALSE))
+      cena_pradu = mean(cena_pradu, na.rm = FALSE))
 
 
 
@@ -132,6 +132,4 @@ ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
 
 
 write_excel_csv2(ramka_rok_do_roku_zmienne, "parsed_dane/ramka_rok_do_roku_zmienne.csv")
-
-
-
+write_excel_csv2(ceny_mil_euro, "parsed_dane/ceny_mil_euro.csv")

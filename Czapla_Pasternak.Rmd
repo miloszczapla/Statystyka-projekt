@@ -53,6 +53,7 @@ library(ggplot2)
 
 ```{r}
 ramka_rok_do_roku_zmienne <- read_delim("parsed_dane/ramka_rok_do_roku_zmienne.csv")
+ceny_mil_euro <- read_delim("parsed_dane/ceny_mil_euro.csv")
 
 #naprawa źle pobranhych danych typu double
 ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`  <- ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`   /100
@@ -82,7 +83,8 @@ kable(ramka_rok_do_roku_zmienne[1:5,]) # pokaż 5 wierszy ramki danych
  ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu,group = zakres_geograficzny,color = zakres_geograficzny)) +
   geom_line() +
   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu)) +
-  labs(x = 'rok',y = 'Cena gazu [EUR/KWh]')
+  labs(x = 'rok',y = 'Cena gazu [EUR/KWh]') + 
+    ggtitle("Cena gazu w Europie w latach 2012 - 2020")
 ```
 
 Z wykresu możemy zauważyć, że cena gazu w Europie, mogą się mocno różnić. Mówimy tutaj nawet o 5-krotnej różnicy. W większości krajów widzimy tendencję zniżkową. Polska na ten moment plasuje się w tańszej części przedziału cenowego. Najtaniej pod względem ceny gazu plasuje się Rumunia, Węgry i Turcja. Najdrożej jest natomiast w Hiszpanii.
@@ -93,7 +95,8 @@ Z wykresu możemy zauważyć, że cena gazu w Europie, mogą się mocno różni�
 ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) +
 geom_line() + 
 gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_pradu))  +
-labs(x = 'rok',y = 'Cena prądu [EUR/KWh]')
+labs(x = 'rok',y = 'Cena prądu [EUR/KWh]') + 
+    ggtitle("Cena prądu w Europie w latach 2012 - 2020")
 ```
 
 Ogólnie ceny prądu nie wykazują jakiegoś wspólnego, wyraźnego trendu jak to miało miejsce przy cenie gazu ziemnego. Za pozytywne możemy uznać znacznie taniejącą energię elektryczną w Polsce. Jest nam bardzo blisko do najtańszej Turcji. Hiszpania należy do najdroższych pod tym względem krajów.
@@ -107,7 +110,8 @@ Ogólnie ceny prądu nie wykazują jakiegoś wspólnego, wyraźnego trendu jak t
 ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = ceny_nowych_mieszkan, color=zakres_geograficzny, group = zakres_geograficzny)) +
 geom_line() + 
   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$ceny_nowych_mieszkan)) +
-  labs(x = 'rok',y = 'Zmiana ceny zakupu nowych nieruchomości wzgledem 2015 roku [2015 rok = 100]')
+  labs(x = 'rok',y = 'Zmiana ceny zakupu nowych nieruchomości wzgledem 2015 roku [2015 rok = 100]') +
+    ggtitle(" Zmiana ceny nowych mieszkań")
 ```
 
 ### zmiany cen nieruchomości z rynku wtórnego
@@ -117,12 +121,62 @@ geom_line() +
 ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = ceny_uzywanych_mieszkan, color=zakres_geograficzny, group = zakres_geograficzny)) +
 geom_line() + 
   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan)) +
-  labs(x = 'rok',y = 'Zmiana ceny zakupu nieruchomości z rynku wtórnego wzgledem 2015 roku [2015 rok = 100]')
+  labs(x = 'rok',y = 'Zmiana ceny zakupu nieruchomości z rynku wtórnego wzgledem 2015 roku [2015 rok = 100]') +
+    ggtitle("Zmiana ceny używanych mieszkań")
 ```
 
 Na rynku nieruchomości widzimy silny trend wzrostowy, na rynku wtórnym widać cos co nazwalibyśmy bardziej spójnym trendem. Jest on wolniejszy, ale różnice w trendzie są mniejsze niż na rynku nowych nieruchomości. Najciekawsze pod tym względem jest niemal stała prędkość wzrostu rok do roku w niektórych krajach jak Turcja, Węgry, Czechy. Są to też kraje o najszybszym wzroście cen. Polska wzrasta wolniej niż większość krajów.
 
+# Koszty na mieszkanca
 
+## koszty według roku w postaci tabelki
+```{r}
+as.data.frame(ceny_mil_euro) %>%  arrange(okres_czasu)
+kable(ceny_mil_euro[, -c(3, length(ceny_mil_euro))])
+
+```
+
+
+## Wykresy kilku wybranych kosztów
+    
+```{r}
+
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = `Alcoholic beverages, tobacco and narcotics`, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średni roczny koszt używek na mieszkanca') +
+    ggtitle("wydatki na alkohol i inne używki")
+
+```
+
+```{r}
+
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = Health, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średni roczny koszt opieki zdrowotnej') +
+    ggtitle("opieka zdrowotna")
+
+```
+```{r}
+
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = Transport, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średni roczny koszt transportu') +
+    ggtitle("Transport")
+
+```
+
+```{r}
+
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = `Food and non-alcoholic beverages`, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średni roczny koszt jedzenia i napojów bez alkoholowych') +
+    ggtitle("jedzenie i napoje bez-alkoholowe")
+
+```
 # Zarobki, ich opodatkowanie
 
 ## Opodatkowanie zarobków 
@@ -131,7 +185,8 @@ Na rynku nieruchomości widzimy silny trend wzrostowy, na rynku wtórnym widać 
  ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = `podatek_jako_%_dochodu`, color=zakres_geograficzny, group = zakres_geograficzny)) +
   geom_line() +
 gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`)) +
-  labs(x = 'rok',y = 'opodatkowanie pensji [% pensji]')
+  labs(x = 'rok',y = 'opodatkowanie pensji [% pensji]') +
+    ggtitle("Procent podatku od pensji w latach 2012 - 2020")
 ```
 
 Pensje w krajach się różnią, ale oprócz tego kraje różnią się opodatkowaniem tych pensji. W HiszpaniI i Estonii bardzo __nisko__ opodatkowuje pensje. Polska, Turcja i Czechy należą do grupy średnio opodatkowujących pensję krajów. Węgry i od niedawna także Rumunia bardzo wysoko opodatkowują pensję.
@@ -142,14 +197,16 @@ Pensje w krajach się różnią, ale oprócz tego kraje różnią się opodatkow
  ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = sr_zarobki, color=zakres_geograficzny, group = zakres_geograficzny)) +
   geom_line() +
 gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$sr_zarobki)) +
-  labs(x = 'rok',y = 'średnie roczne zarobki[EUR]')
+  labs(x = 'rok',y = 'średnie roczne zarobki[EUR]') +
+    ggtitle("Średnie roczne zarobki w Europie w latach 2012 - 2019")
 ```
 
 ```{r}
 ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = sr_zarobki, color=zakres_geograficzny)) +
   geom_boxplot() +
   scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
-  labs(x = 'Kraj',y = 'średnie roczne zarobki [EUR]')
+  labs(x = 'Kraj',y = 'średnie roczne zarobki [EUR]') + 
+    ggtitle("wachania rocznych zarobków ze względu na kraj")
 ```
 
 Z wuykresu wynika że większość krajów ma bardzo stabilne zarobki na przestrzeni lat. Estonia, Luxrnburg i Holandia tylko mają większe odchylenia od mediany. 
@@ -166,44 +223,37 @@ ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
  ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = sr_zarobki_bez_podatku, color=zakres_geograficzny, group = zakres_geograficzny)) +
   geom_line() +
 gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$sr_zarobki_bez_podatku)) +
-  labs(x = 'rok',y = 'średnie roczne zarobki pomniejszone o podatek[EUR]')
+  labs(x = 'rok',y = 'średnie roczne zarobki pomniejszone o podatek[EUR]') +
+     ggtitle("Zarobki w europie po odjęciu podatku")
 ```
 
 Jak widzimy mimo różnych stawek podatkowych nie wpłynęło to zbytnio na kraje, które nas interesują. Najlepiej zarabia się w Luksemburgu, najgorzej w Rumunii i Turcji, Polska plasuje się niewiele wyżej. Można powiedzieć, że Europa dzieli się w większości na kraje, w których zarabia się rocznie do 10000 Euro rocznie i to tych gdzie te zarobki są średnio zbliżone do 15-18 tysięcy za rok wykonywania pracy.
 
-## bezrobocie
+## zarobki odjąć koszty życia przeciętnego mieszkańca
 
 ```{r}
- ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = bezrobocie, color=zakres_geograficzny, group = zakres_geograficzny)) +
+#dodawanie pomniejszenia do ramki danych o podatek
+ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
+  mutate(zarobki_odjac_koszty = (sr_zarobki - Total)/100)
+
+# sam wykres
+ ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = zarobki_odjac_koszty, color=zakres_geograficzny, group = zakres_geograficzny)) +
   geom_line() +
-gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$bezrobocie)) +
-  labs(x = 'rok',y = 'średnie roczne zarobki[EUR]')
+gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$zarobki_odjac_koszty)) +
+  labs(x = 'rok',y = 'średnia różnica zarobków i kosztów') +
+     ggtitle("Stan budzetu danej osoby po odjeciu kosztów z zarobków")
 ```
 
-## Podrozdział
+```{r}
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = zarobki_odjac_koszty, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średnie roczne zarobki [EUR]') + 
+    ggtitle("Średnie roczne zarobki ze względu na kraj")
+```
 
-TODO
+Z wykresów wynika, że po odjęciu kosztów życia od zarobków pozostajemy z różnicami pomiędzy krajami UE, Z czego wynika, że jest relatywnie łatwo wybrać nam kraj, w którym jest tanio bądź drogo się utrzymać i żyć, nawet porównując to do zarobków, ponieważ nie dochodzi do znacznych tasowań, przynajmniej jeśli jesteśmy średnim mieszkańcem danego państwa.
 
-Kilka wyróżnień: _to pierwsze_, a to __drugie wyróżnienie__.
-
-### Może jakie wypunktowanie
-
-Lista 
-
-- pkt. 1
-- pkt. 2
-- pkt. 3
-
-A może taka?
-
-1. pkt. 1
-2. pkt. 2
-3. pkt. 3
-
-
-# Rozdział 2
-
-A może chcesz w opisie umieścić największą wartość z kolumny `hp`? Najwięcej, czyli `r max(mtcars$hp)` 
-koni mechanicznych ma samochów w wierszu nr `r which.max(mtcars$hp)`. 
+Dziękujemy za lektórę 
 
 
