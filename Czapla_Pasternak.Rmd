@@ -52,13 +52,14 @@ library(ggplot2)
 ## Wczytajmy potrzebne ramki danych: 
 
 ```{r}
-ramka_rok_do_roku_zmienne <- read_delim("parsed_dane/ramka_rok_do_roku_zmienne.csv")
-ceny_mil_euro <- read_delim("parsed_dane/ceny_mil_euro.csv")
+ramka_rok_do_roku_zmienne <- read_csv2("parsed_dane/ramka_rok_do_roku_zmienne.csv")
+ceny_mil_euro <- read_csv2("parsed_dane/ceny_mil_euro.csv")
 
 #naprawa źle pobranhych danych typu double
-ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`  <- ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`   /100
-ramka_rok_do_roku_zmienne$ceny_nowych_mieszkan <- ramka_rok_do_roku_zmienne$ceny_nowych_mieszkan  /100
-ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan <- ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan  /100
+#ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`  <- ramka_rok_do_roku_zmienne$`podatek_jako_%_dochodu`   /100
+#ramka_rok_do_roku_zmienne$ceny_nowych_mieszkan <- ramka_rok_do_roku_zmienne$ceny_nowych_mieszkan  /100
+#ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan <- ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan  /100
+
 ```
 
 ## stworzenie funckcji wybierającej kraje z najbardziej skrajnymi wartościami i subiektywny wybór krajów
@@ -74,7 +75,7 @@ ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan <- ramka_rok_do_roku_zmienne$c
 ## dane na których pracujemy
 
 ``` {r}
-kable(ramka_rok_do_roku_zmienne[1:5,]) # pokaż 5 wierszy ramki danych
+glimpse(ramka_rok_do_roku_zmienne)
 ```
 
 ## cena gazu
@@ -82,6 +83,7 @@ kable(ramka_rok_do_roku_zmienne[1:5,]) # pokaż 5 wierszy ramki danych
 ```{r}
  ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_gazu,group = zakres_geograficzny,color = zakres_geograficzny)) +
   geom_line() +
+  scale_y_continuous(breaks = seq(0.01, 0.08, by = 0.005)) +
   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_gazu)) +
   labs(x = 'rok',y = 'Cena gazu [EUR/KWh]') + 
     ggtitle("Cena gazu w Europie w latach 2012 - 2020")
@@ -91,9 +93,11 @@ Z wykresu możemy zauważyć, że cena gazu w Europie, mogą się mocno różni�
 
 ## cena prądu
 
+
 ```{r}
 ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = cena_pradu, color=zakres_geograficzny, group = zakres_geograficzny)) +
 geom_line() + 
+  scale_y_continuous(breaks = seq(0.07, 0.21, by = 0.01)) +
 gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$cena_pradu))  +
 labs(x = 'rok',y = 'Cena prądu [EUR/KWh]') + 
     ggtitle("Cena prądu w Europie w latach 2012 - 2020")
@@ -109,6 +113,7 @@ Ogólnie ceny prądu nie wykazują jakiegoś wspólnego, wyraźnego trendu jak t
 ```{r}
 ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = ceny_nowych_mieszkan, color=zakres_geograficzny, group = zakres_geograficzny)) +
 geom_line() + 
+  scale_y_continuous(breaks = seq(70, 170, by = 10)) +
   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$ceny_nowych_mieszkan)) +
   labs(x = 'rok',y = 'Zmiana ceny zakupu nowych nieruchomości wzgledem 2015 roku [2015 rok = 100]') +
     ggtitle(" Zmiana ceny nowych mieszkań")
@@ -120,6 +125,7 @@ geom_line() +
 ```{r}
 ggplot(ramka_rok_do_roku_zmienne, aes(x=okres_czasu,y = ceny_uzywanych_mieszkan, color=zakres_geograficzny, group = zakres_geograficzny)) +
 geom_line() + 
+   scale_y_continuous(breaks = seq(70, 170, by = 10)) +
   gghighlight(ramka_rok_do_roku_zmienne$zakres_geograficzny %in% getKrajeDoPorownaniaPolski(ramka_rok_do_roku_zmienne,ramka_rok_do_roku_zmienne$ceny_uzywanych_mieszkan)) +
   labs(x = 'rok',y = 'Zmiana ceny zakupu nieruchomości z rynku wtórnego wzgledem 2015 roku [2015 rok = 100]') +
     ggtitle("Zmiana ceny używanych mieszkań")
@@ -127,17 +133,28 @@ geom_line() +
 
 Na rynku nieruchomości widzimy silny trend wzrostowy, na rynku wtórnym widać cos co nazwalibyśmy bardziej spójnym trendem. Jest on wolniejszy, ale różnice w trendzie są mniejsze niż na rynku nowych nieruchomości. Najciekawsze pod tym względem jest niemal stała prędkość wzrostu rok do roku w niektórych krajach jak Turcja, Węgry, Czechy. Są to też kraje o najszybszym wzroście cen. Polska wzrasta wolniej niż większość krajów.
 
-# Koszty na mieszkanca
+# Koszty na jednego mieszkańca danego kraju mieszkanca w Euro
 
 ## koszty według roku w postaci tabelki
 ```{r}
-as.data.frame(ceny_mil_euro) %>%  arrange(okres_czasu)
-kable(ceny_mil_euro[10, -c(3, length(ceny_mil_euro))]) #tylko pierwszych 10 rekordów
+koszty_mieszkania <- as.data.frame(ceny_mil_euro) %>%
+  arrange(okres_czasu)
+kable(koszty_mieszkania[1:10, c('zakres_geograficzny','okres_czasu','Food and non-alcoholic beverages','Alcoholic beverages, tobacco and narcotics','Health','Transport')]) #tylko pierwszych 10 rekordówz
 
 ```
 
 
 ## Wykresy kilku wybranych kosztów
+
+```{r}
+
+ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = `Food and non-alcoholic beverages`, color=zakres_geograficzny)) +
+  geom_boxplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
+  labs(x = 'Kraj',y = 'średni roczny koszt jedzenia i napojów bez alkoholowych') +
+    ggtitle("jedzenie i napoje bez-alkoholowe")
+
+```
     
 ```{r}
 
@@ -168,15 +185,7 @@ ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = Transport, color
 
 ```
 
-```{r}
 
-ggplot(ramka_rok_do_roku_zmienne, aes(x=zakres_geograficzny,y = `Food and non-alcoholic beverages`, color=zakres_geograficzny)) +
-  geom_boxplot() +
-  scale_x_discrete(guide = guide_axis(n.dodge = 3)) +
-  labs(x = 'Kraj',y = 'średni roczny koszt jedzenia i napojów bez alkoholowych') +
-    ggtitle("jedzenie i napoje bez-alkoholowe")
-
-```
 
 Uzyskane wyniki świadczą o dużych różnicach w wydatkach ludzi z różnych krajów, mimo że mieszkańcy Luksemburgu zawsze wydaje najwięcej w porównaniu do innych, to ludzie z reszty krajów zależnie od wybranej grupy wydatków zmieniała swoje preferencje wydawania pieniędzy.
 

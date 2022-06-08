@@ -10,10 +10,8 @@ cena_pradu <- read_excel('dane/cena_pradu.xlsx')
 ceny_nowych_mieszkan <- read_excel('dane/ceny_nowych_mieszkan.xlsx')
 ceny_uzywanych_mieszkan <- read_excel('dane/ceny_uzywanych_mieszkan.xlsx')
 wartosc_podatku <- read_excel('dane/wartosc_podatku.xlsx')
-inflacja <- read_csv('dane/inflacja.csv')
 zarobki_kob_euro <- read_excel('dane/zarobki_kob_euro.xlsx')
 zarobki_mez_euro <- read_excel('dane/zarobki_mez_euro.xlsx')
-parytety_sily_nabywczej <- read_excel('dane/parytety_sily_nabywczej.xlsx')
 ceny_mil_euro <- read_excel('dane/ceny_mil_euro.xlsx')
 populacja_w_europie <- read_excel('dane/populacja_w_europie.xlsx')
 
@@ -56,10 +54,8 @@ populacja_w_europie <- cbind(populacja_w_europie_1, populacja_w_europie_2)
 cena_gazu <- pivot_longer(cena_gazu,cols = !TIME, names_to = "okres_czasu", values_to = "cena_gazu")
 cena_pradu <- pivot_longer(cena_pradu,cols = !TIME, names_to = "okres_czasu", values_to = "cena_pradu")
 wartosc_podatku <- pivot_longer(wartosc_podatku,cols = !TIME, names_to = "okres_czasu", values_to = "podatek_jako_%_dochodu")
-inflacja <- pivot_longer(inflacja,cols = !geo, names_to = "okres_czasu", values_to = "inflacja_rok_do_roku")
 zarobki_kob_euro <- pivot_longer(zarobki_kob_euro[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "średnie_roczne_zarobki_kobiet")
 zarobki_mez_euro <- pivot_longer(zarobki_mez_euro[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "średnie_roczne_zarobki_mężczyzn")
-parytety_sily_nabywczej <- pivot_longer(parytety_sily_nabywczej[-1,],cols = !TIME, names_to = "okres_czasu", values_to = "parytety_sily_nabywczej")
 ceny_nowych_mieszkan <- pivot_longer(ceny_nowych_mieszkan,cols = !TIME, names_to = "okres_czasu", values_to = "ceny_nowych_mieszkan")
 ceny_uzywanych_mieszkan <- pivot_longer(ceny_uzywanych_mieszkan,cols = !TIME, names_to = "okres_czasu", values_to = "ceny_uzywanych_mieszkan")
 populacja_w_europie <- pivot_longer(populacja_w_europie,cols = !TIME, names_to = "okres_czasu", values_to = "populacja_w_europie")
@@ -75,10 +71,8 @@ populacja_w_europie <- pivot_longer(populacja_w_europie,cols = !TIME, names_to =
 names(cena_gazu )[1] <- 'zakres_geograficzny'
 names(cena_pradu )[1] <- 'zakres_geograficzny'
 names(wartosc_podatku )[1] <- 'zakres_geograficzny'
-names(inflacja )[1] <- 'zakres_geograficzny'
 names(zarobki_kob_euro )[1] <- 'zakres_geograficzny'
 names(zarobki_mez_euro )[1] <- 'zakres_geograficzny'
-names(parytety_sily_nabywczej )[1] <- 'zakres_geograficzny'
 names(ceny_nowych_mieszkan )[1] <- 'zakres_geograficzny'
 names(ceny_uzywanych_mieszkan )[1] <- 'zakres_geograficzny'
 names(populacja_w_europie )[1] <- 'zakres_geograficzny'
@@ -117,10 +111,8 @@ ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
 
 ramka_rok_do_roku_zmienne <- ramka_rok_do_roku_zmienne %>%
   merge(wartosc_podatku, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-  merge(inflacja, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(zarobki_kob_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(zarobki_mez_euro, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
-  merge(parytety_sily_nabywczej, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(ceny_nowych_mieszkan, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(ceny_uzywanych_mieszkan, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
   merge(populacja_w_europie, by = c('zakres_geograficzny','okres_czasu'), all= TRUE) %>%
